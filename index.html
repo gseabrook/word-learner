@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Word Learner</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script>
+		const dictionary = {
+			"Strekken zich uit": "Strech out",
+			"Ruim": "More than",
+			"Beslaan": "To Cover",
+			"Laagwater": "Low tide",
+			"Ontstaan": "To Originate",
+			"Ijstijden": "Ice age",
+			"Smelten": "To Melt",
+			"Grotendeels": "Largely",
+			"Blazen": "To Blow",
+			"Aaneengesloten": "Consecutive",
+			"Afbreken": "To Break Down",
+			"Wegslaan": "To Beat Away",
+			"Geulen": "Gullies",
+			"Langzamerhand": "Slowly"
+		};
+		const shuffled = {};
+		let subset = [], copy = [];
+		let currentWord = undefined;
+		let iteration = 0;
+		let size = 3;
+		function initialize() {			
+			console.log("Initialized...");
+			shuffle(Object.keys(dictionary)).forEach(x => shuffled[x] = dictionary[x]);
+
+			window.addEventListener('keydown', (e) => {
+				if (e.keyCode === 39) {
+					nextWord();
+				}
+			});
+
+			addWords();
+		}
+		function nextWord() {
+			currentWord = copy.pop();
+			
+			let currentWordDiv = document.getElementById("word")
+			currentWordDiv.innerHTML = currentWord;
+			currentWordDiv.classList.remove("invisible");
+			
+			hideAnswerDiv();
+
+			window.speechSynthesis.speak(new SpeechSynthesisUtterance(currentWord));
+			if (copy.length == 0) {
+				if (subset.length === Object.keys(dictionary).length) {
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance("You have finished, well done"));	
+				} else {
+					addWords();
+				}
+			}
+		}
+
+		function hideAnswerDiv() {
+			let answerDiv = document.getElementById("answer");
+			answerDiv.innerHTML = "";
+			answerDiv.classList.add("invisible");
+		}
+
+		function answer() {
+			let answer = dictionary[currentWord];
+			window.speechSynthesis.speak(new SpeechSynthesisUtterance(answer));
+			document.getElementById("answer").innerHTML = answer;
+			document.getElementById("answer").classList.remove("invisible");
+		}
+
+		function addWords() {
+			let newWords = Object.keys(shuffled).slice(iteration * size, ++iteration * size);
+			console.log("Adding " + newWords);
+			Array.prototype.push.apply(subset, newWords);
+			copy = subset.slice();
+			shuffle(copy);
+			console.log("Copy: "+ copy);
+		}
+
+		function shuffle(array) {
+		  var currentIndex = array.length, temporaryValue, randomIndex;
+
+		  // While there remain elements to shuffle...
+		  while (0 !== currentIndex) {
+
+		    // Pick a remaining element...
+		    randomIndex = Math.floor(Math.random() * currentIndex);
+		    currentIndex -= 1;
+
+		    // And swap it with the current element.
+		    temporaryValue = array[currentIndex];
+		    array[currentIndex] = array[randomIndex];
+		    array[randomIndex] = temporaryValue;
+		  }
+
+		  return array;
+		}
+
+	</script>
+	<style>
+		div.btn-group {
+			width: 100%;
+			height: 500px;
+			margin-bottom: 1rem;
+		}
+		.btn-group>.btn:focus {
+			z-index: 0;
+			box-shadow: none;
+		}
+		div.btn-group button {
+			width: 50%;
+		}
+		div.alert {
+			text-align: center;
+		}
+	</style>
+</head>
+<body onload="initialize()">
+	<div class="btn-group" role="group" aria-label="inputs">
+		<button class="btn btn-primary" onclick="nextWord()">Question</button>
+		<button class="btn btn-danger" onclick="answer()">Answer</button>
+	</div>
+	<div class="alert alert-primary invisible" role="alert" id="word"></div>
+	<div class="alert alert-danger invisible" role="alert" id="answer"></div>
+</body>
+</html>
